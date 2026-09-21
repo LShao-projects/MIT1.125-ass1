@@ -1,0 +1,25 @@
+{
+  "browser": "Chrome headless",
+  "checks": [
+    "Default KPIs match independent CSV calculation",
+    "Neighborhood totals reconcile",
+    "Year filter and partial-year label",
+    "All filter dimensions intersect correctly",
+    "Filters restore from URL",
+    "Pedestrian involvement and reset",
+    "Intersection metric toggle",
+    "Accessible numeric table sorting",
+    "Invalid date range preserves prior results and exposes correction",
+    "Empty selections have zero KPIs and no invented findings",
+    "Chart data tables reconcile to KPI total",
+    "desktop layout has no page overflow and retains filters",
+    "tablet layout has no page overflow and retains filters",
+    "mobile layout has no page overflow and retains filters",
+    "small-mobile layout has no page overflow and retains filters",
+    "Native fields support keyboard focus; reset works with Enter",
+    "Reduced motion respected",
+    "CSV failure state recovers with retry",
+    "No browser JavaScript errors"
+  ],
+  "errors": []
+}

@@ -1,0 +1,26 @@
+{
+  "all": {
+    "total": 15508,
+    "injuries": 2261,
+    "vulnerable": 2114,
+    "hospitalizations": 2328
+  },
+  "2026": {
+    "total": 1176,
+    "injuries": 221,
+    "vulnerable": 136,
+    "hospitalizations": 141
+  },
+  "pedestrian": {
+    "total": 817,
+    "injuries": 445,
+    "vulnerable": 817,
+    "hospitalizations": 506
+  },
+  "combined": {
+    "total": 2,
+    "injuries": 2,
+    "vulnerable": 2,
+    "hospitalizations": 2
+  }
+}
