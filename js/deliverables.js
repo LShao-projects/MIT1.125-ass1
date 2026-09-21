@@ -1,1 +1,1 @@
-document.querySelector('#print-note').addEventListener('click',()=>window.print());
+// Reserved for future presentation controls.
