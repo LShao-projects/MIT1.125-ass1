@@ -42,9 +42,28 @@ export function parseDate(value) {
   if(date.getUTCMonth()!==month || date.getUTCDate()!==day) return null;
   return {year, iso:`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`, hour:h%12+(m[7]==='PM'?12:0), weekday:date.getUTCDay()};
 }
+// Street-type abbreviations, expanded on every word EXCEPT the first, so that
+// "SIDNEY ST EXT" becomes "Sidney Street Extension" while "ST MARY RD" keeps its
+// leading "St" instead of turning into "Street Mary Road".
+const STREET_TYPES={ST:'STREET',STEET:'STREET',AVE:'AVENUE',AV:'AVENUE',RD:'ROAD',BLVD:'BOULEVARD',
+  DR:'DRIVE',PL:'PLACE',CT:'COURT',PKWY:'PARKWAY',HWY:'HIGHWAY',TER:'TERRACE',SQ:'SQUARE',LN:'LANE',
+  CIR:'CIRCLE',EXT:'EXTENSION'};
+// Whole-name synonyms. This is an explicit, auditable list, not fuzzy matching:
+// every entry was checked against City of Cambridge records, and near-matches we
+// could not verify (e.g. "SAINT MARY'S STREET") are deliberately left unmerged.
+const SYNONYMS=[
+  [/^MASS(ACHUSETTS)?( (AVENUE|AVENU|AVEUNUE|AVENBUE|AVVE|VENUE))?$/,'MASSACHUSETTS AVENUE'],
+  [/^(MON?S|MSGR?|MSG|MNSR|O'?BRIEN|OBRIEN).*BRIEN/,"MONSIGNOR O'BRIEN HIGHWAY"],
+  [/^(ST|SAINT) MARY('S)?( ROAD)?$/,'ST MARY ROAD']
+];
 export function normalizeStreet(value) {
-  const suffixes={ST:'STREET',AVE:'AVENUE',RD:'ROAD',BLVD:'BOULEVARD',DR:'DRIVE',PL:'PLACE',CT:'COURT',PKWY:'PARKWAY',TER:'TERRACE',SQ:'SQUARE',LN:'LANE'};
-  return value.trim().toUpperCase().replace(/\./g,'').replace(/\s+/g,' ').split(' ').map(w=>suffixes[w]||w).join(' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+  let text=value.trim().toUpperCase().replace(/\./g,'').replace(/\s+/g,' ').replace(/^\d+ /,'');
+  text=text.split(' ').map((w,i)=>i?STREET_TYPES[w]||w:w).join(' ');
+  for(const [pattern,canonical] of SYNONYMS) if(pattern.test(text)) {text=canonical;break;}
+  // Title-case: capitalise each word, and after an apostrophe only when a name
+  // follows ("O'Brien"), never a possessive ("Mary's").
+  return text.toLowerCase().replace(/(^|[\s-])(\w)/g,(m,lead,c)=>lead+c.toUpperCase())
+    .replace(/'(\w{2,})/g,(m,w)=>`'${w[0].toUpperCase()}${w.slice(1)}`);
 }
 export function cleanData(raw) {
   const required=['Date Time','Intersection Street One','Intersection Street Two','Neighborhood (estimated)',...Object.values(FIELDS)];

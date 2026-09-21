@@ -20,7 +20,13 @@ const origin=process.env.PREVIEW_URL||'http://127.0.0.1:4173';
   assert.equal(await page.locator('#partial-warning').isVisible(),true);
   await page.locator('#year').selectOption('2026');await kpis(oracle['2026']);check('Year filter and partial-year label');
   await page.locator('#neighborhood').selectOption('North Cambridge');await page.locator('#mode').selectOption('cyclist');await page.locator('#injury').check();await page.locator('#hospital').check();await kpis(oracle.combined);check('All filter dimensions intersect correctly');
-  const findings=await page.locator('#finding-content').textContent();assert.ok(findings.includes(oracle.combined.vulnerable.toLocaleString('en-US')));
+  // Findings and recommendations are authored, not generated: assert they are
+  // present and that every "supporting finding" link resolves to a real anchor.
+  const findingIds=await page.locator('#finding-content .finding').evaluateAll(els=>els.map(e=>e.id));
+  assert.ok(findingIds.length>=3&&findingIds.every(Boolean));
+  const links=await page.locator('#recommendation-content a[href^="#"]').evaluateAll(els=>els.map(e=>e.getAttribute('href').slice(1)));
+  assert.ok(links.length>=2);
+  for(const target of links) assert.ok(findingIds.includes(target),`recommendation links to missing finding #${target}`);
   await page.reload();await page.waitForFunction(()=>!document.querySelector('#filter-fields').disabled);await kpis(oracle.combined);assert.equal(await page.locator('#hospital').isChecked(),true);check('Filters restore from URL');
   await page.getByRole('button',{name:'Reset filters'}).click();await kpis(oracle.all);
   await page.locator('#mode').selectOption('pedestrian');await kpis(oracle.pedestrian);check('Pedestrian involvement and reset');
@@ -29,7 +35,7 @@ const origin=process.env.PREVIEW_URL||'http://127.0.0.1:4173';
   await page.locator('[data-sort="total"]').click();const sorted=await page.locator('#neighborhood-table tbody td:nth-child(2)').allTextContents();const n=sorted.map(x=>Number(x.replace(/,/g,'')));assert.deepEqual(n,[...n].sort((a,b)=>a-b));check('Accessible numeric table sorting');
   await page.locator('#start').fill('2026-09-20');await page.locator('#end').fill('2026-01-01');await page.locator('#end').dispatchEvent('change');assert.equal(await page.locator('#date-error').isVisible(),true);check('Invalid date range preserves prior results and exposes correction');
   await page.getByRole('button',{name:'Reset filters'}).click();
-  await page.locator('#start').fill('2026-09-20');await page.locator('#end').fill('2026-09-20');await page.locator('#mode').selectOption('pedestrian');await page.locator('#hospital').check();assert.equal(await value('#kpi-total'),0);assert.ok((await page.locator('#finding-content').textContent()).includes('No matching'));assert.ok(!(await page.locator('body').textContent()).includes('NaN'));check('Empty selections have zero KPIs and no invented findings');
+  await page.locator('#start').fill('2026-09-20');await page.locator('#end').fill('2026-09-20');await page.locator('#mode').selectOption('pedestrian');await page.locator('#hospital').check();assert.equal(await value('#kpi-total'),0);assert.ok((await page.locator('#finding-content .finding').count())>=3,'authored findings stay visible on an empty selection');assert.ok(!(await page.locator('body').textContent()).includes('NaN'));check('Empty selections have zero KPIs and no invented findings');
   await page.getByRole('button',{name:'Reset filters'}).click();
   await page.locator('[data-metric="total"]').click();await page.locator('[data-sort="total"]').click();
   await page.locator('#trend-table').locator('..').locator('summary').click();const trendTotal=(await page.locator('#trend-table tbody td:nth-child(2)').allTextContents()).reduce((s,x)=>s+Number(x.replace(/,/g,'')),0);assert.equal(trendTotal,oracle.all.total);await page.locator('#trend-table').locator('..').locator('summary').click();

@@ -14,7 +14,17 @@ body{background:#e9eef7}
 .scope-line{margin:18px 0 14px}.scope-tag{letter-spacing:1px;color:#74829a}.partial-warning{background:#f5f1e8;border-color:#e6dfcf;color:#756044;border-radius:9px}
 .kpi-grid{gap:18px;margin-bottom:24px}.kpi{border:1px solid #dce4f0;border-radius:14px;padding:22px 25px;box-shadow:0 5px 16px #203b6504}.kpi-top{color:#5f6e84;font-size:12px;font-weight:550}.kpi-value{font-size:44px;font-weight:600;letter-spacing:-1.7px;color:#213c68;margin:16px 0 9px}.kpi-icon{background:#edf3ff;color:#486bab;border-radius:9px}.kpi-note{font-size:11px;color:#63738b}.kpi:first-child{background:#244f9b;border-color:#244f9b}.kpi:first-child .kpi-value{color:#fff}.kpi:first-child .kpi-top,.kpi:first-child .kpi-note{color:#dce7fb}.kpi:first-child .kpi-icon{color:#e6efff;background:#ffffff18}
 .panel{border:1px solid #dce4f0;box-shadow:0 5px 20px #23395704;padding:28px;border-radius:16px}.panel h3{font-size:21px;font-weight:650;letter-spacing:-.45px}.panel-title .eyebrow{color:#617da6;font-size:9px}.chart-description{font-size:13px;color:#60708a}.chart-footnote{font-size:12px;color:#6b7990}.chart-scroll .gridline{stroke:#e5eaf3;stroke-dasharray:none}.segmented{border:0;background:#eef2f8;padding:4px;border-radius:9px}.segmented button{border-radius:6px}.rank-track{background:#eef2f8;height:6px}.rank-fill{background:#799dd5}.rank-row:first-child .rank-fill{background:#315fc0}
-.map-layout{border-color:#dce4f0;border-radius:12px}.map-sidebar{background:#f8faff;border-color:#dce4f0}.map-main-stat strong{color:#244f9b}.map-filter-button{background:#244f9b;border-radius:9px}.map-canvas{background:#f2f5fa}#map-basemap{filter:grayscale(1) contrast(.8) brightness(1.15)}.map-region{fill-opacity:.7}.map-region[aria-pressed=true]{stroke:#173869;fill-opacity:.8}.map-tools [role=group]{box-shadow:0 3px 10px #1b355514}
+.map-layout{border-color:#dce4f0;border-radius:12px}.map-sidebar{background:#f8faff;border-color:#dce4f0}.map-main-stat strong{color:#244f9b}.map-filter-button{background:#244f9b;border-radius:9px}.map-canvas{background:#f2f5fa}#map-basemap{filter:grayscale(1) contrast(.8) brightness(1.15)}.map-region{fill-opacity:.7}.map-region[aria-pressed=true]{stroke:#173869;fill-opacity:.8}
+/* The neighborhood the whole dashboard is filtered to. Every area keeps its
+   real colour so the map stays comparable; this one is ringed instead. */
+.map-region.is-filtered{stroke:#173869;stroke-width:4;fill-opacity:.92}
+/* Areas outside the active filter keep their colour, lightly faded, so the
+   selected one stands out while the rest remain comparable. */
+.map-region.is-dimmed{fill-opacity:.48;stroke:#fff}
+.map-region.is-dimmed:hover{fill-opacity:.72;stroke:#172b49}
+.map-marker.is-dimmed{opacity:.72}
+.map-marker.is-dimmed circle{stroke-width:1}
+.map-marker.is-filtered circle{stroke:#173869;stroke-width:3}.map-tools [role=group]{box-shadow:0 3px 10px #1b355514}
 .insights-section{padding-top:36px;padding-bottom:55px}.insights-grid{gap:40px}.recommendations{background:#f7f9fd;border-color:#d5dfed;border-radius:16px}.finding{border-color:#cfd9e9}.live-badge{color:#4a6694}
 .limitations-section{background:#1b3153;padding:46px 0}.limitations-section h2{font-size:31px}.limitations-grid p{color:#c7d3e6}.limitations-grid h3{border-color:#486080}.limitations-section .eyebrow{color:#adc8f6}
 .methodology-section{padding:48px 0 55px}.methodology-grid{gap:70px}.source-list a{border-color:#cdd8e9}.source-list .source-note{color:#68778d}footer{background:#e1e8f3;border-color:#cfd9e9}

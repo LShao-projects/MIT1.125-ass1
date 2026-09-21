@@ -1,5 +1,5 @@
-import {parseCSV,cleanData,filterRows,summarize,groupBy,number,percent,escapeHTML as esc,prettyDate,UNKNOWN} from './data.js';
-import {renderTrend,renderIntersections,renderHourly,intersectionGroups,hourLabel} from './charts.js';
+import {parseCSV,cleanData,filterRows,summarize,number,percent,escapeHTML as esc,prettyDate,UNKNOWN} from './data.js';
+import {renderTrend,renderIntersections,renderHourly} from './charts.js';
 import {createNeighborhoodMap} from './map.js';
 const $=selector=>document.querySelector(selector);
 let rows=[],extent={},quality={},selected=[];
@@ -27,21 +27,6 @@ function syncYear(){
   $('#year').value=start===extent.min&&end===extent.max?'all':start.slice(0,4)===end.slice(0,4)&&start===([`${start.slice(0,4)}-01-01`,extent.min].sort().at(-1))&&end===(`${start.slice(0,4)}-12-31`>extent.max?extent.max:`${start.slice(0,4)}-12-31`)?start.slice(0,4):'custom';
 }
 function syncRanking(){document.querySelectorAll('[data-metric]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.metric===metric)));}
-function renderInsights(data){
-  if(!data.length){$('#finding-content').innerHTML='<p class="empty">No matching records. Broaden your selection to generate findings.</p>';$('#recommendation-content').innerHTML='<p>No evidence-based priority can be proposed for an empty selection. Reset filters or expand the date range.</p>';return;}
-  const s=summarize(data),intersections=intersectionGroups(data).sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name));
-  const top=intersections[0],hours=[...groupBy(data,'hour')].map(([hour,list])=>({hour,count:list.length})).sort((a,b)=>b.count-a.count||a.hour-b.hour);
-  const peaks=hours.filter(h=>h.count===hours[0].count),hourNames=peaks.map(h=>`${hourLabel(h.hour)}–${hourLabel((h.hour+1)%24)}`).join(', ');
-  const topTies=top?intersections.filter(i=>i.total===top.total):[];
-  const finding=(id,title,text)=>`<div id="${id}" class="finding"><span class="finding-marker" aria-hidden="true">↗</span><div><h4>${title}</h4><p>${text}</p></div></div>`;
-  $('#finding-content').innerHTML=(top?finding('finding-location',`${esc(top.name)}`,`${number(top.total)} reported crashes${topTies.length>1?` — tied for the largest named-intersection count with ${number(topTies.length-1)} other intersection${topTies.length>2?'s':''}`:' — the largest count among recorded street pairs'}. This is ${percent(top.total,data.length)} of all selected crashes; incomplete intersection records are excluded from this ranking.`):finding('finding-location','Intersection detail is unavailable','No selected records have both intersection street names. Location priorities cannot be identified from this selection.'))+
-    finding('finding-mode','People walking and cycling',`${number(s.vulnerable)} selected crashes (${percent(s.vulnerable,s.total)}) involved a pedestrian or cyclist. Across all modes, ${number(s.injuries)} crashes (${percent(s.injuries,s.total)}) involved a recorded injury.`)+
-    finding('finding-hour',peaks.length===1?`${hourNames} has the most records`:'Several hours share the highest count',`${peaks.length===1?'This hour':`${hourNames}`} ${peaks.length===1?'accounts':'each account'} for ${number(hours[0].count)} crashes (${percent(hours[0].count,s.total)}${peaks.length>1?' each':''}). These counts do not account for trips made in each hour.`);
-  const rec=(title,text,link)=>`<div class="recommendation"><h4>${title}</h4><p>${text}</p><a href="#${link}">View supporting finding ↑</a></div>`;
-  $('#recommendation-content').innerHTML=(top?rec('Prioritize a location review',`${esc(top.name)} has ${number(top.total)} selected crashes${topTies.length>1?' and shares the top count':''}. Validate the street-pair grouping, then review crash reports and observe turning movements, visibility, and crossing conditions before selecting an intervention.`,'finding-location'):rec('Resolve location gaps first','The selection has no complete intersection pairs. Review source location records before choosing sites for a field assessment.','finding-location'))+
-    (s.vulnerable?rec('Examine walking and cycling conditions',`The ${number(s.vulnerable)} pedestrian / cyclist-involved crashes warrant a closer review of conflict patterns and crossing or bicycle-facility continuity. Add walking and cycling volume data to assess exposure before comparing risk.`,'finding-mode'):rec('Check road-user coverage','No selected crashes record pedestrian or cyclist involvement. Confirm whether active mode filters or missing involvement fields explain this result before drawing conclusions about these groups.','finding-mode'))+
-    rec('Match observations to reported timing',`Use ${hourNames} as ${peaks.length===1?'a candidate period':'candidate periods'} for field observations: ${number(hours[0].count)} selected crashes occurred in ${peaks.length===1?'this hour':'each'}. Compare traffic volumes and conditions across other hours before attributing causes.`,'finding-hour');
-}
 function update(){
   const state=currentState();
   const invalid=!state.start||!state.end||state.start>state.end||state.start<extent.min||state.end>extent.max;
@@ -49,13 +34,16 @@ function update(){
   for(const k of ['start','end'])$(`#${k}`).setAttribute('aria-invalid',String(invalid));
   if(invalid){$('#date-error').textContent=`Choose a start date on or before the end date, within ${prettyDate(extent.min)}–${prettyDate(extent.max)}. The last valid results remain displayed.`;return;}
   selected=filterRows(rows,state);const stats=summarize(selected);
+  // The map compares areas, so it aggregates every filter EXCEPT the neighborhood
+  // one; otherwise selecting one area zeroes out all the others.
+  const areaRows=state.neighborhood?filterRows(rows,{...state,neighborhood:''}):selected;
   for(const [key,value] of Object.entries(stats))$(`#kpi-${key}`).textContent=number(value);
   $('#injury-share').textContent=`${percent(stats.injuries,stats.total)} of selected crashes · not people`;
   $('#vulnerable-share').textContent=`${percent(stats.vulnerable,stats.total)} of selected crashes · counted once`;
   $('#selection-count').textContent=`${number(selected.length)} of ${number(rows.length)} records`;
   $('#scope').textContent=`${prettyDate(state.start)} – ${prettyDate(state.end)} · ${state.neighborhood||'All neighborhoods'} · ${$('#mode').selectedOptions[0].text}${state.injury?' · Injury crashes':''}${state.hospital?' · Hospitalization only':''} · ${number(selected.length)} crashes`;
   $('#partial-warning').hidden=!(state.end>='2026-01-01'&&state.start<='2026-12-31');
-  renderTrend(selected,state,extent);renderIntersections(selected,metric);renderHourly(selected);neighborhoodMap.update(selected,state,mapMetric);renderInsights(selected);saveState(state);
+  renderTrend(selected,state,extent);renderIntersections(selected,metric);renderHourly(selected);neighborhoodMap.update(selected,state,mapMetric,areaRows);saveState(state);
 }
 async function load(){
   $('#load-status').hidden=false;$('#load-status').classList.remove('error');$('#load-status').textContent='Loading and validating the local crash log…';$('#filter-fields').disabled=true;

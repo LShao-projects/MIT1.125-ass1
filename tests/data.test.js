@@ -16,6 +16,29 @@ test('source timestamps preserve local calendar date and noon/midnight', () => {
 test('normalization expands suffixes without guessing missing street types', () => {
   assert.equal(normalizeStreet('  Massachusetts   Ave. '), 'Massachusetts Avenue');
   assert.equal(normalizeStreet('BRATTLE'), 'Brattle');
+  // Suffixes expand after the first word, so a leading "ST" stays a saint.
+  assert.equal(normalizeStreet('ST MARY RD'), 'St Mary Road');
+  assert.equal(normalizeStreet('SIDNEY ST EXT'), normalizeStreet('SIDNEY ST EXTENSION'));
+  assert.equal(normalizeStreet('BRATTLE STEET'), 'Brattle Street');
+  // A leading house number is not part of the street name.
+  assert.equal(normalizeStreet('330 MT AUBURN ST'), normalizeStreet('MT AUBURN STREET'));
+  // Apostrophes: a name is capitalised, a possessive is not.
+  assert.equal(normalizeStreet("MONSIGNOR O'BRIEN HIGHWAY"), "Monsignor O'Brien Highway");
+  assert.equal(normalizeStreet("SAINT MARY'S STREET"), "Saint Mary's Street");
+});
+test('verified synonyms merge; unverified near-matches stay apart', () => {
+  // Cambridge's busiest street is written both ways throughout the log.
+  for (const variant of ['MASS AVE','Mass Avenue','MASSACHUSETTS AV','MASSACHUSETTS'])
+    assert.equal(normalizeStreet(variant), 'Massachusetts Avenue');
+  // ...but a genuinely different road must not be swept in.
+  assert.equal(normalizeStreet('MASS AVENUE EXTENSION'), 'Mass Avenue Extension');
+  for (const variant of ["MSGR O'BRIEN HWY",'MONSIGNOR OBRIEN',"239 MOSIGNOR O'BRIEN HIGHWAY"])
+    assert.equal(normalizeStreet(variant), "Monsignor O'Brien Highway");
+  // St Mary Road (Mid-Cambridge) is one road under five spellings; Saint Mary's
+  // Street could not be verified as the same place, so it is left separate.
+  for (const variant of ['ST MARY RD','ST MARY ROAD',"ST MARY'S ROAD",'ST MARY'])
+    assert.equal(normalizeStreet(variant), 'St Mary Road');
+  assert.notEqual(normalizeStreet("SAINT MARY'S STREET"), 'St Mary Road');
 });
 const load = () => cleanData(parseCSV(readFileSync(new URL('../data/cambridge_crashes.csv', import.meta.url),'utf8')));
 test('entire CSV agrees with independent Python audit', () => {

@@ -68,7 +68,30 @@
       <p class="chart-footnote">Counts are not exposure-adjusted risk. Neighborhood assignments are estimated in the CPD log; this map joins those names to <a href="https://www.cambridgema.gov/gis/gisdatadictionary/boundary/boundary_cddneighborhoods" target="_blank" rel="noreferrer">official City of Cambridge GIS boundaries ↗</a>. It does not plot individual crash locations.</p>
     </article>
   </div></section>
-  <section id="findings" class="wrap insights-section" aria-labelledby="findings-title"><div class="section-heading"><div><h2 id="findings-title">From Patterns to Questions</h2><p class="section-subtitle">What the selected data tells us</p></div><span class="live-badge"><span class="status-dot"></span> Updates with your filters</span></div><div class="insights-grid"><article><h3 class="insight-heading">Key findings</h3><div id="finding-content"><p>Findings will be calculated after the CSV loads.</p></div></article><article class="recommendations"><h3 class="insight-heading">Recommendations</h3><p class="recommendation-intro">Practical next steps for further review, grounded in this selection.</p><div id="recommendation-content"><p>Recommendations will follow the observed data.</p></div></article></div></section>
+  <section id="findings" class="wrap insights-section" aria-labelledby="findings-title"><div class="section-heading"><div><h2 id="findings-title">From Patterns to Questions</h2><p class="section-subtitle">What the full 2016&ndash;2026 record tells us</p></div></div><div class="insights-grid"><article><h3 class="insight-heading">Key findings</h3><div id="finding-content">
+
+<!-- EDIT FINDINGS HERE. Copy a block to add another. Keep the id= so the
+     matching recommendation's "View supporting finding" link still works. -->
+
+<div id="finding-location" class="finding"><span class="finding-marker" aria-hidden="true">&#8599;</span><div><h4>Albany Street &amp; Massachusetts Avenue</h4><p>66 reported crashes, the largest count of any street pair in the record. Three of the four busiest corners sit on Massachusetts Avenue, which suggests a corridor pattern rather than four unrelated sites.</p></div></div>
+
+<div id="finding-mode" class="finding"><span class="finding-marker" aria-hidden="true">&#8599;</span><div><h4>People walking and cycling</h4><p>2,114 crashes (13.6%) involved a pedestrian or cyclist, and 2,261 (14.6%) involved a recorded injury. Cyclists appear in 1,319 crashes and pedestrians in 817, against 11,731 involving a motorist.</p></div></div>
+
+<div id="finding-hour" class="finding"><span class="finding-marker" aria-hidden="true">&#8599;</span><div><h4>2pm&ndash;3pm carries the most records</h4><p>1,177 crashes (7.6%) fall in this hour, ahead of the 5pm commute peak. The afternoon concentration holds across years, so it is unlikely to be an artifact of one period.</p></div></div>
+
+</div></article><article class="recommendations"><h3 class="insight-heading">Recommendations</h3><p class="recommendation-intro">Practical next steps for further review.</p><div id="recommendation-content">
+
+<!-- EDIT RECOMMENDATIONS HERE. The href must match a finding id above. -->
+
+<div class="recommendation"><h4>Start the corridor review on Massachusetts Avenue</h4><p>Albany, Garden and Vassar Street crossings together account for 161 reported crashes. Review them as one corridor rather than three sites, and check signal timing and crossing conditions along the stretch before choosing an intervention.</p><a href="#finding-location">View supporting finding &#8593;</a></div>
+
+<div class="recommendation"><h4>Collect walking and cycling volumes</h4><p>Counts alone cannot separate a dangerous location from a busy one. Commission short pedestrian and bicycle counts at the top corridor sites so the 2,114 walk/bike crashes can be expressed as a rate rather than a total.</p><a href="#finding-mode">View supporting finding &#8593;</a></div>
+
+<div class="recommendation"><h4>Observe in the field during the afternoon peak</h4><p>Schedule observation between 2pm and 5pm, when reported crashes cluster. Compare conditions against a quieter hour at the same location before attributing the pattern to design rather than traffic volume.</p><a href="#finding-hour">View supporting finding &#8593;</a></div>
+
+<div class="recommendation"><h4>Close the location-reporting gap</h4><p>61.6% of crash records carry a street address instead of an intersection pair, so most of the record cannot inform site ranking. Ask CPD to capture both cross streets where applicable; this would widen the evidence base at no survey cost.</p><a href="#finding-location">View supporting finding &#8593;</a></div>
+
+</div></article></div></section>
   <section id="limitations" class="limitations-section" aria-labelledby="limitations-title"><div class="wrap"><h2 id="limitations-title">Missing Data, Bias, Uncertainty & Limitations</h2><div class="limitations-grid">
 <article><h3>Missing Data</h3><ul><li>3,052 records (19.7%) have no neighborhood assignment.</li><li>Incomplete street pairs are excluded from intersection rankings, but remain in other totals.</li><li>Traffic volumes and walking/cycling exposure are unavailable.</li></ul></article>
 <article><h3>Bias</h3><ul><li>Unreported crashes and near misses are not captured.</li><li>Reporting may differ by location, road-user group, and crash severity.</li><li>Busy locations may have more crashes simply because more trips occur there.</li></ul></article>
@@ -83,7 +106,30 @@
 <li><a href="https://www.cambridgema.gov/streetsandtransportation/policiesordinancesandplans/visionzero" target="_blank" rel="noreferrer"><strong>Cambridge Vision Zero policy ↗</strong><span>cambridgema.gov · Vision Zero</span></a></li></ul>
 <dl class="reference-dates"><div><dt>Coverage</dt><dd>Jan 2, 2016 – Sep 20, 2026</dd></div><div><dt>Download date</dt><dd>September 21, 2026</dd></div><div><dt>Updates</dt><dd>Fixed snapshot; no automatic refresh</dd></div></dl></div>
 <div><h3>Units & metric definitions</h3><dl class="metric-definitions"><div><dt>Total crashes</dt><dd>Number of selected reported crash records.</dd></div><div><dt>Injury crashes</dt><dd>Records with at least one injured person.</dd></div><div><dt>Walk / bike crashes</dt><dd>At least one pedestrian or cyclist; each crash counted once.</dd></div><div><dt>Hospitalizations</dt><dd>Estimated people transported; not verified admissions.</dd></div><div><dt>Injury share (%)</dt><dd>Injury crashes ÷ all crashes in the selected group × 100.</dd></div><div><dt>Road-user mode</dt><dd>At least one recorded participant of that type; groups overlap.</dd></div><div><dt>Time & location</dt><dd>Cambridge local time; estimated neighborhood assignments.</dd></div></dl></div></div>
-<details class="quality-details"><summary>Cleaning rules & data quality</summary><ul><li>Street names are standardized and street pairs sorted. Both streets are required for intersection rankings; no fuzzy matching or geocoding.</li><li>Missing or invalid numeric values remain unknown. Exact duplicates are retained because no unique crash ID is available.</li><li>Filters combine with AND; dates include both endpoints. Rankings use counts and alphabetical tie-breaking.</li><li>Partial years are marked, not annualized. The map shows neighborhood aggregates, not individual crash locations.</li></ul><p id="quality-summary">Loading data quality counts…</p><p id="unknown-modes"></p></details>
+<details class="quality-details"><summary>What is in the data, what we did to it, and what stays hard</summary>
+<h4>What the file contains</h4><ul>
+<li><strong>One row is one reported crash</strong>, not one person: 15,508 rows, 11 columns, Jan 2 2016 &ndash; Sep 20 2026.</li>
+<li>Each row carries a timestamp, up to two intersecting street names, a street address, five counts (motorists, cyclists, pedestrians, injured people, estimated hospitalizations) and an estimated neighborhood.</li>
+<li>Coverage is uneven by field: 5,953 rows (38.4%) name both cross streets, 12,456 (80.3%) name a neighborhood, 11,731 record a motorist.</li>
+<li>The address columns are read but never displayed. A house number is close to a personal location, so it stays out of the site.</li></ul>
+<h4>What preprocessing does</h4><ul>
+<li>Parses the CSV in your browser. A row is dropped only if its date cannot be read &mdash; <strong>0 of 15,508</strong> were.</li>
+<li>Reads timestamps as Cambridge wall-clock time, so a viewer&rsquo;s own timezone cannot move a crash to another day.</li>
+<li>Keeps blanks as <em>unknown</em> rather than 0, so missing data can never satisfy an injury, hospitalization or mode filter. This file has 0 blank counts.</li>
+<li>Standardizes street names: trims them, drops periods and leading house numbers, and expands abbreviations after the first word so &ldquo;St Mary Rd&rdquo; keeps its saint instead of becoming &ldquo;Street Mary Road&rdquo;.</li>
+<li>Merges a short list of synonyms checked against City records &mdash; &ldquo;Mass Ave&rdquo; and &ldquo;Massachusetts Avenue&rdquo; are one street, written 447 and 799 times &mdash; then sorts each pair so &ldquo;A &amp; B&rdquo; and &ldquo;B &amp; A&rdquo; are one corner. Together this turns <strong>3,613 raw street pairs into 1,891 real intersections</strong>.</li>
+<li>Counts exact duplicate rows but keeps them; with no unique crash ID, deleting one would be a guess. This file has 0.</li></ul>
+<h4>What stays hard</h4><ul>
+<li><strong>The intersection ranking runs on 38.4% of records.</strong> The other 9,555 were logged at a street address instead, and stay in every other total.</li>
+<li>3,052 crashes (19.7%) have no neighborhood and cannot be placed on the map, though they remain in citywide counts.</li>
+<li>3,441 crashes (22.2%) record no road user at all, so they sit in the total but in none of the three mode series.</li>
+<li>Street names are free text &mdash; Massachusetts Avenue alone appears under 16 spellings. We merged only variants we could verify and left near-matches apart: &ldquo;Saint Mary&rsquo;s Street&rdquo; is <em>not</em> treated as St Mary Road, because we could not confirm they are the same place.</li>
+<li>Even after merging, 1,097 of 1,891 corners hold a single crash, so the long tail is thin evidence.</li>
+<li>Nothing here measures exposure. With no traffic, walking or cycling volumes, a count cannot become a rate.</li></ul>
+<h4>How the numbers are combined</h4><ul>
+<li>Filters combine with AND; dates include both endpoints. Rankings use counts with alphabetical tie-breaking, and ties are stated.</li>
+<li>Partial years are marked, never annualized. The map shows neighborhood aggregates, not individual crash locations.</li></ul>
+<p id="quality-summary">Loading data quality counts…</p><p id="unknown-modes"></p></details>
 </section>
 </main>
 <footer><div class="wrap"><span class="footer-name">Cambridge Street Safety Priorities</span><span>Reported patterns. Better questions. Informed reviews.</span><a href="#top">Back to top ↑</a></div></footer>
