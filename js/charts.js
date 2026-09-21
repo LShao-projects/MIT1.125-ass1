@@ -42,7 +42,7 @@ export function renderHourly(rows){
   const {ceiling,values}=ticks(Math.max(...counts)),y=v=>top+plotH-v/ceiling*plotH,peak=Math.max(...counts);
   let svg=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="hour-title hour-desc"><title id="hour-title">Crashes by hour of day</title><desc id="hour-desc">Each bar counts selected crashes in one local-clock hour. The darkest bars have the highest counts. Exact values are in the expandable table.</desc>`;
   values.forEach(v=>{svg+=`<line class="gridline" x1="${left}" y1="${y(v)}" x2="${width-right}" y2="${y(v)}"/><text x="${left-10}" y="${y(v)+5}" text-anchor="end">${number(v)}</text>`;});
-  counts.forEach((v,h)=>{const x=left+h*step+4;svg+=`<rect x="${x}" y="${y(v)}" width="${step-8}" height="${v/ceiling*plotH}" rx="3" fill="${v===peak?'var(--primary)':'#88b4a5'}"><title>${hourLabel(h)}–${hourLabel((h+1)%24)}: ${number(v)} crashes</title></rect><text x="${x+(step-8)/2}" y="${height-14}" text-anchor="middle" style="font-size:13px">${hourLabel(h)}</text>`;});
+  counts.forEach((v,h)=>{const x=left+h*step+4;svg+=`<rect x="${x}" y="${y(v)}" width="${step-8}" height="${v/ceiling*plotH}" rx="3" fill="${v===peak?'var(--primary)':'#8aaedc'}"><title>${hourLabel(h)}–${hourLabel((h+1)%24)}: ${number(v)} crashes</title></rect><text x="${x+(step-8)/2}" y="${height-14}" text-anchor="middle" style="font-size:13px">${hourLabel(h)}</text>`;});
   document.querySelector('#hourly').innerHTML=svg+'</svg>';
   document.querySelector('#hour-table').innerHTML=table(['Local hour','Crashes'],counts.map((v,h)=>[`${hourLabel(h)}–${hourLabel((h+1)%24)}`,number(v)]));
 }

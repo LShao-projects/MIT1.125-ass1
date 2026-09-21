@@ -1,18 +1,27 @@
 import {groupBy,summarize,number,percent,escapeHTML as esc} from './data.js';
 export const MAP_METRICS={total:'Total crashes',injuries:'Injury crashes',vulnerable:'Walk / bike crashes',hospitalizations:'Estimated hospitalizations'};
-const COLORS=['#daebe4','#adcfc1','#72a994','#388069','#124d50'];
+const COLORS=['#deebfa','#aacbec','#729fda','#3b74b7','#173f7a'];
 export function aggregateMap(rows,features){
  const groups=groupBy(rows,'neighborhood'),names=new Set(features.map(f=>f.properties.NAME));
  return {areas:features.map(f=>({name:f.properties.NAME,id:f.properties.N_HOOD,...summarize(groups.get(f.properties.NAME)||[])})),unmapped:summarize(rows.filter(r=>!names.has(r.neighborhood)))};
 }
+// Shared Web Mercator coordinates keep boundaries aligned with street tiles.
+const TILE_ZOOM=13, WORLD=256*2**TILE_ZOOM;
+const mercator=([lon,lat])=>[(lon+180)/360*WORLD,(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*WORLD];
+const mapCenter=mercator([-71.108,42.373]);
+const origin=[mapCenter[0]-420,mapCenter[1]-300];
+const project=p=>{const xy=mercator(p);return [xy[0]-origin[0],xy[1]-origin[1]];};
+function basemap(zoom,center){
+ const tx=zoom===1?0:420-zoom*center[0],ty=zoom===1?0:300-zoom*center[1];
+ const left=origin[0]-tx/zoom,top=origin[1]-ty/zoom;
+ let tiles='';
+ for(let x=Math.floor(left/256);x<=Math.floor((left+840/zoom)/256);x++)
+  for(let y=Math.floor(top/256);y<=Math.floor((top+600/zoom)/256);y++)
+   tiles+=`<image x="${x*256-origin[0]}" y="${y*256-origin[1]}" width="256" height="256" href="https://tile.openstreetmap.org/${TILE_ZOOM}/${x}/${y}.png"/>`;
+ return tiles;
+}
 export function projectBoundaries(geo){
  const polygons=f=>f.geometry.type==='MultiPolygon'?f.geometry.coordinates:[f.geometry.coordinates];
- const points=geo.features.flatMap(f=>polygons(f).flat(2));
- const cos=Math.cos(42.37*Math.PI/180),xs=points.map(p=>p[0]*cos),ys=points.map(p=>-p[1]);
- const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
- const scale=Math.min(760/(maxX-minX),520/(maxY-minY));
- const ox=(840-(maxX-minX)*scale)/2,oy=(600-(maxY-minY)*scale)/2;
- const project=p=>[ox+(p[0]*cos-minX)*scale,oy+(-p[1]-minY)*scale];
  return geo.features.map(f=>{
   const rings=polygons(f).flat().map(r=>r.map(project));
   let area=0,cx=0,cy=0;const ring=rings[0];
@@ -37,6 +46,8 @@ export function createNeighborhoodMap(onFilter,onMetric){
   const c=geometry.find(g=>g.name===selectedName)?.center||[420,300];
   const x=zoom===1?0:420-zoom*c[0],y=zoom===1?0:300-zoom*c[1];
   group.setAttribute('transform',`translate(${x} ${y}) scale(${zoom})`);
+  const base=$('#map-basemap');base.setAttribute('transform',`translate(${x} ${y}) scale(${zoom})`);base.innerHTML=basemap(zoom,c);
+  base.querySelectorAll('image').forEach(img=>img.addEventListener('error',()=>{$('#basemap-note').hidden=false;}));
   $('#map-zoom-out').disabled=zoom<=1;$('#map-zoom-in').disabled=zoom>=2.5;
  }
  function select(name){selectedName=name;details();transform();}
@@ -47,7 +58,7 @@ export function createNeighborhoodMap(onFilter,onMetric){
   if(!selectedName)selectedName=[...areas].sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name))[0].name;
   const bin=v=>Math.min(4,Math.max(0,Math.ceil(v/Math.max(1,max)*5)-1));
   const byName=new Map(areas.map(a=>[a.name,a]));
-  $('#map-graphic').innerHTML=`<svg viewBox="0 0 840 600" role="group" aria-label="Cambridge neighborhood comparison map"><defs><pattern id="map-excluded" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#eef2f0"/><path d="M0 8L8 0" stroke="#cad6d0" stroke-width="1"/></pattern></defs><g id="map-geography">${geometry.map(g=>{const a=byName.get(g.name),excluded=state.neighborhood&&state.neighborhood!==g.name;return `<path class="map-region" data-name="${esc(g.name)}" data-count="${a[metric]}" d="${g.path}" fill="${excluded?'url(#map-excluded)':a[metric]===0?'#f3f6f4':COLORS[bin(a[metric])]}" fill-rule="evenodd" role="button" tabindex="0" aria-pressed="${g.name===selectedName}" aria-label="${esc(g.name)}: ${number(a[metric])} ${MAP_METRICS[metric].toLowerCase()}${excluded?', outside active neighborhood filter':''}. Inspect neighborhood"><title>${esc(g.name)} · ${number(a[metric])} ${MAP_METRICS[metric].toLowerCase()}</title></path>`;}).join('')}${geometry.map(g=>`<g class="map-marker" data-name="${esc(g.name)}" transform="translate(${g.center[0]} ${g.center[1]})" aria-hidden="true"><circle r="15"/><text text-anchor="middle" dy="5">${esc(g.id)}</text></g>`).join('')}</g></svg>`;
+  $('#map-graphic').innerHTML=`<svg viewBox="0 0 840 600" role="group" aria-label="Cambridge neighborhoods with surrounding Boston area streets"><defs><pattern id="map-excluded" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#eef2f8"/><path d="M0 8L8 0" stroke="#cbd6e6" stroke-width="1"/></pattern></defs><g id="map-basemap" aria-hidden="true"></g><g id="map-geography">${geometry.map(g=>{const a=byName.get(g.name),excluded=state.neighborhood&&state.neighborhood!==g.name;return `<path class="map-region" data-name="${esc(g.name)}" data-count="${a[metric]}" d="${g.path}" fill="${excluded?'url(#map-excluded)':a[metric]===0?'#f3f6fb':COLORS[bin(a[metric])]}" fill-rule="evenodd" role="button" tabindex="0" aria-pressed="${g.name===selectedName}" aria-label="${esc(g.name)}: ${number(a[metric])} ${MAP_METRICS[metric].toLowerCase()}${excluded?', outside active neighborhood filter':''}. Inspect neighborhood"><title>${esc(g.name)} · ${number(a[metric])} ${MAP_METRICS[metric].toLowerCase()}</title></path>`;}).join('')}${geometry.map(g=>`<g class="map-marker" data-name="${esc(g.name)}" transform="translate(${g.center[0]} ${g.center[1]})" aria-hidden="true"><circle r="15"/><text text-anchor="middle" dy="5">${esc(g.id)}</text></g>`).join('')}</g></svg>`;
   document.querySelectorAll('.map-region').forEach(path=>{
    path.addEventListener('click',()=>select(path.dataset.name));
    path.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(path.dataset.name);}});
