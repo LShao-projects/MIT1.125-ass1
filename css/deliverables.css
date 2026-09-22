@@ -8,3 +8,5 @@
 
 #printable-note h3:not(.print-title){font-size:19px;color:var(--ink);margin:28px 0 12px;line-height:1.4}.preparation-steps{padding-left:24px;color:#40536e;font-size:16px;line-height:1.8;margin:0 0 22px}.preparation-steps li{padding-left:5px;margin-bottom:16px}@media(max-width:600px){.preparation-steps{font-size:15px;padding-left:20px}}
 @media print{#printable-note h3:not(.print-title){font-size:12pt;margin:12pt 0 6pt;break-after:avoid}.preparation-steps{font-size:10pt;line-height:1.45}.preparation-steps li{margin-bottom:8pt}}
+
+.presentation-video{display:block;width:100%;height:auto;max-height:75vh;background:#10223d;border-radius:12px}.presentation-link{margin-top:14px;font-size:14px}
