@@ -57,9 +57,6 @@ async function load(){
     $('#neighborhood').innerHTML='<option value="">All neighborhoods</option>'+[...new Set(rows.map(r=>r.neighborhood))].sort((a,b)=>a===UNKNOWN?1:b===UNKNOWN?-1:a.localeCompare(b)).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
     for(const key of ['start','end']){$(`#${key}`).min=extent.min;$(`#${key}`).max=extent.max;$(`#${key}`).value=key==='start'?extent.min:extent.max;}
     $('#partial-copy').textContent=`The supplied dataset ends on ${prettyDate(extent.max)}.`;
-    $('#quality-summary').textContent=`The file contains ${number(quality.sourceRows)} records; ${number(quality.invalidDates)} were excluded for invalid dates. Of the retained records, ${number(quality.missingNeighborhood)} have no neighborhood and ${number(quality.incompleteIntersections)} lack a complete intersection pair. There are ${number(quality.unknownNumeric)} unknown numeric fields and ${number(quality.exactDuplicates)} exact duplicate rows.`;
-    const unknown=rows.filter(r=>!(r.motorist>0||r.cyclist>0||r.pedestrian>0)).length;
-    $('#unknown-modes').textContent=`Across the entire supplied dataset, ${number(unknown)} records have no positive recorded count for any of the three road-user modes. These records are included in the all-mode total but not in the three involvement series.`;
     restoreState();$('#filter-fields').disabled=false;$('#load-status').hidden=true;update();
   }catch(error){$('#load-status').classList.add('error');$('#load-status').innerHTML=`<strong>The crash data could not be loaded.</strong> ${esc(error.message)} Serve this project with a local web server and confirm the CSV is in the data folder. <button id="retry" type="button">Try again</button>`;$('#retry').addEventListener('click',load);}
 }
