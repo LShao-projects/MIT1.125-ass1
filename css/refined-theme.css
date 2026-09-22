@@ -63,3 +63,14 @@ body{background:#e9eef7}
 /* SVG focus follows the neighborhood boundary, never a rectangular box. */
 #map-graphic svg,#map-graphic .map-region:focus,#map-graphic .map-region:focus-visible{outline:none}
 #map-graphic .map-region:focus-visible{stroke:#244f9b;stroke-width:4;stroke-dasharray:4 2}
+
+/* Make the problem, purpose, and intended user explicit in the overview. */
+.hero-copy-label{display:block;color:#c7dbff;font-size:12px;line-height:1.5;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:7px}
+.hero-purpose{margin-top:18px}
+.hero .audience{margin-top:22px;padding:14px 18px;border-left:3px solid #b4ceff;background:#203a63;font-size:16px;line-height:1.6}
+.hero .audience strong{display:block;color:#c7dbff;font-size:12px;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:5px}
+.hero .audience span{display:block;font-weight:650}
+
+/* Six global filters keep balanced rows at each breakpoint. */
+.filter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:600px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-grid label:last-child{grid-column:1/-1}}

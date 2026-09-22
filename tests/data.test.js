@@ -68,3 +68,16 @@ test('unknown numeric values stay unknown; reversed intersections group together
   assert.equal(rows[0].injured,null);
   assert.equal(quality.unknownNumeric,2);
 });
+test('day type matches calendar dates and independent snapshot totals',()=>{
+  const {rows}=load();
+  const weekdays=filterRows(rows,{dayType:'weekday'}),weekends=filterRows(rows,{dayType:'weekend'});
+  assert.equal(weekdays.length,12236);
+  assert.equal(weekends.length,3272);
+  assert.equal(weekdays.length+weekends.length,rows.length);
+  assert.equal(weekdays.filter(r=>r.hour===14).length,910);
+  assert.equal(weekends.filter(r=>r.hour===14).length,267);
+  assert.equal(filterRows(rows,{dayType:'weekday',start:'2016-01-02',end:'2016-01-03'}).length,0);
+  const combined=filterRows(rows,{dayType:'weekend',start:'2025-01-01',end:'2025-12-31',mode:'cyclist',injury:true});
+  assert.ok(combined.length>0);
+  assert.ok(combined.every(r=>[0,6].includes(r.weekday)&&r.year===2025&&r.cyclist>0&&r.injured>0));
+});

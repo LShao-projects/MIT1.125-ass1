@@ -5,8 +5,8 @@ const $=selector=>document.querySelector(selector);
 let rows=[],extent={},quality={},selected=[];
 let metric='total',mapMetric='total';
 const neighborhoodMap=createNeighborhoodMap(name=>{$('#neighborhood').value=name;update();},value=>{mapMetric=value;saveState(currentState());});
-const controls=['year','start','end','neighborhood','mode','injury','hospital'];
-function currentState(){return {start:$('#start').value,end:$('#end').value,neighborhood:$('#neighborhood').value,mode:$('#mode').value,injury:$('#injury').checked,hospital:$('#hospital').checked};}
+const controls=['year','start','end','neighborhood','mode','dayType','injury','hospital'];
+function currentState(){return {start:$('#start').value,end:$('#end').value,neighborhood:$('#neighborhood').value,mode:$('#mode').value,dayType:$('#dayType').value,injury:$('#injury').checked,hospital:$('#hospital').checked};}
 function saveState(state){
   const url=new URL(location.href);url.search='';
   for(const [key,value] of Object.entries(state))if(value&&value!=='all')url.searchParams.set(key,String(value));
@@ -15,7 +15,7 @@ function saveState(state){
 }
 function restoreState(){
   const params=new URLSearchParams(location.search);
-  for(const key of ['neighborhood','mode']){const el=$(`#${key}`),v=params.get(key);if([...el.options].some(o=>o.value===v))el.value=v;}
+  for(const key of ['neighborhood','mode','dayType']){const el=$(`#${key}`),v=params.get(key);if([...el.options].some(o=>o.value===v))el.value=v;}
   for(const key of ['start','end']){const v=params.get(key);if(v&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&v>=extent.min&&v<=extent.max)$(`#${key}`).value=v;}
   for(const key of ['injury','hospital'])$(`#${key}`).checked=params.get(key)==='true';
   if(['total','injuries','vulnerable'].includes(params.get('metric')))metric=params.get('metric');
@@ -38,10 +38,10 @@ function update(){
   // one; otherwise selecting one area zeroes out all the others.
   const areaRows=state.neighborhood?filterRows(rows,{...state,neighborhood:''}):selected;
   for(const [key,value] of Object.entries(stats))$(`#kpi-${key}`).textContent=number(value);
-  $('#injury-share').textContent=`${percent(stats.injuries,stats.total)} of selected crashes · not people`;
-  $('#vulnerable-share').textContent=`${percent(stats.vulnerable,stats.total)} of selected crashes · counted once`;
+  $('#injury-share').textContent=`${percent(stats.injuries,stats.total)} of selected crashes had at least one person injured.`;
+  $('#vulnerable-share').textContent=`${percent(stats.vulnerable,stats.total)} of selected crashes involved someone walking or cycling. Each crash is counted once.`;
   $('#selection-count').textContent=`${number(selected.length)} of ${number(rows.length)} records`;
-  $('#scope').textContent=`${prettyDate(state.start)} – ${prettyDate(state.end)} · ${state.neighborhood||'All neighborhoods'} · ${$('#mode').selectedOptions[0].text}${state.injury?' · Injury crashes':''}${state.hospital?' · Hospitalization only':''} · ${number(selected.length)} crashes`;
+  $('#scope').textContent=`${prettyDate(state.start)} – ${prettyDate(state.end)} · ${state.neighborhood||'All neighborhoods'} · ${$('#mode').selectedOptions[0].text} · ${$('#dayType').selectedOptions[0].text}${state.injury?' · Injury crashes':''}${state.hospital?' · Hospitalization only':''} · ${number(selected.length)} crashes`;
   $('#partial-warning').hidden=!(state.end>='2026-01-01'&&state.start<='2026-12-31');
   renderTrend(selected,state,extent);renderIntersections(selected,metric);renderHourly(selected);neighborhoodMap.update(selected,state,mapMetric,areaRows);saveState(state);
 }
@@ -53,7 +53,6 @@ async function load(){
     ({rows,quality}=cleanData(parseCSV(await response.text())));
     const dates=rows.map(r=>r.iso).sort();extent={min:dates[0],max:dates.at(-1)};
     const years=[...new Set(rows.map(r=>r.year))].sort((a,b)=>a-b);
-    $('#coverage').textContent=`${prettyDate(extent.min)} – ${prettyDate(extent.max)}`;
     $('#year').innerHTML='<option value="all">All years</option>'+years.map(y=>`<option value="${y}">${y}${y===2026?' (partial)':''}</option>`).join('')+'<option value="custom">Custom dates</option>';
     $('#neighborhood').innerHTML='<option value="">All neighborhoods</option>'+[...new Set(rows.map(r=>r.neighborhood))].sort((a,b)=>a===UNKNOWN?1:b===UNKNOWN?-1:a.localeCompare(b)).map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
     for(const key of ['start','end']){$(`#${key}`).min=extent.min;$(`#${key}`).max=extent.max;$(`#${key}`).value=key==='start'?extent.min:extent.max;}
@@ -71,7 +70,7 @@ controls.forEach(id=>$(`#${id}`).addEventListener('change',()=>{
   }else if(id==='start'||id==='end')syncYear();
   update();
 }));
-$('#filters').addEventListener('reset',event=>{event.preventDefault();$('#year').value='all';$('#start').value=extent.min;$('#end').value=extent.max;$('#neighborhood').value='';$('#mode').value='all';$('#injury').checked=false;$('#hospital').checked=false;update();});
+$('#filters').addEventListener('reset',event=>{event.preventDefault();$('#year').value='all';$('#start').value=extent.min;$('#end').value=extent.max;$('#neighborhood').value='';$('#mode').value='all';$('#dayType').value='all';$('#injury').checked=false;$('#hospital').checked=false;update();});
 document.querySelectorAll('[data-metric]').forEach(b=>b.addEventListener('click',()=>{metric=b.dataset.metric;syncRanking();renderIntersections(selected,metric);saveState(currentState());}));
 neighborhoodMap.load();
 load();

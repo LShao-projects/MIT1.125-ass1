@@ -92,6 +92,7 @@ export function cleanData(raw) {
 export function filterRows(rows,state={}) {
   return rows.filter(r=>(!state.start||r.iso>=state.start)&&(!state.end||r.iso<=state.end)&&
     (!state.neighborhood||r.neighborhood===state.neighborhood)&&
+    (state.dayType==='weekday'?r.weekday>=1&&r.weekday<=5:state.dayType==='weekend'?r.weekday===0||r.weekday===6:true)&&
     (!state.mode||state.mode==='all'||r[state.mode]>0)&&(!state.injury||r.injured>0)&&(!state.hospital||r.hospital>0));
 }
 export function summarize(rows) {

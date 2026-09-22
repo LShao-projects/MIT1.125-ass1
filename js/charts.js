@@ -3,6 +3,12 @@ const empty='<div class="empty">No matching crashes. Try widening the date range
 export const hourLabel=h=>`${h%12||12}${h<12?'am':'pm'}`;
 const table=(heads,rows)=>`<table><thead><tr>${heads.map(h=>`<th scope="col">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 function ticks(max){const raw=Math.max(1,max/4),power=10**Math.floor(Math.log10(raw)),factor=raw/power;const step=(factor<=1?1:factor<=2?2:factor<=5?5:10)*power;const ceiling=Math.max(step,Math.ceil(max/step)*step);return {ceiling,values:Array.from({length:Math.round(ceiling/step)+1},(_,i)=>i*step)};}
+export function isPartialTrendYear(year,state,extent){
+  // This snapshot's Jan 1, 2016 gap is disclosed in a note, not a partial-year label.
+  const notedStart=year===2016&&extent.min==='2016-01-02'&&state.start===extent.min;
+  return (year===+extent.max.slice(0,4)&&extent.max.slice(5)<'12-31')||
+    (state.start>`${year}-01-01`&&!notedStart)||state.end<`${year}-12-31`;
+}
 export function renderTrend(rows,state,extent){
   const target=document.querySelector('#trend'),dataTarget=document.querySelector('#trend-table');
   if(!rows.length){target.innerHTML=empty;dataTarget.innerHTML='No matching records.';return;}
@@ -10,7 +16,7 @@ export function renderTrend(rows,state,extent){
   const groups=groupBy(rows,'year');
   const years=Array.from({length:last-first+1},(_,i)=>first+i);
   const data=years.map(year=>{const records=groups.get(year)||[];return {year,total:records.length,motorist:records.filter(r=>r.motorist>0).length,cyclist:records.filter(r=>r.cyclist>0).length,pedestrian:records.filter(r=>r.pedestrian>0).length,
-    partial:year===+extent.max.slice(0,4)&&extent.max.slice(5)<'12-31'||state.start>`${year}-01-01`||state.end<`${year}-12-31`};});
+    partial:isPartialTrendYear(year,state,extent)};});
   const width=720,height=330,left=54,right=30,top=35,bottom=47,plotH=height-top-bottom;
   const {ceiling,values}=ticks(Math.max(...data.flatMap(d=>[d.motorist,d.cyclist,d.pedestrian])));
   const x=i=>left+(years.length===1?(width-left-right)/2:i*(width-left-right)/(years.length-1));
